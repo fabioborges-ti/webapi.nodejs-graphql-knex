@@ -1,0 +1,3 @@
+#import Usuario, Perfil from 'Usuario.gql'
+#import Query from 'Query.gql'
+#import Mutation from 'Mutation.gql'

@@ -1,0 +1,26 @@
+{
+  "name": "prog-graphql",
+  "version": "1.0.0",
+  "description": "",
+  "main": "./src/index.js",
+  "scripts": {
+    "dev": "nodemon --ext js,graphql,gql",
+    "lint": "eslint --fix --ext .js,.jsx ."
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "apollo-server": "^3.5.0",
+    "graphql": "^16.2.0",
+    "graphql-import": "^1.0.2",
+    "knex": "^0.95.15",
+    "pg": "^8.7.1"
+  },
+  "devDependencies": {
+    "eslint": "^8.5.0",
+    "eslint-config-prettier": "6.15.0",
+    "eslint-plugin-prettier": "3.2.0",
+    "nodemon": "^2.0.4",
+    "prettier": "^2.5.1"
+  }
+}
