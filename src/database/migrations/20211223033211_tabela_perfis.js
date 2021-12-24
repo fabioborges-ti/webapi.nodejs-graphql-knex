@@ -9,7 +9,6 @@ exports.up = function (knex) {
       return knex('perfis').insert([
         { nome: 'comum', rotulo: 'Comum' },
         { nome: 'admin', rotulo: 'Administrador' },
-        { nome: 'master', rotulo: 'Master ' },
       ]);
     });
 };

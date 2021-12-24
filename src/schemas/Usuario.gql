@@ -5,6 +5,12 @@ type Usuario {
   perfis: [Perfil]
 }
 
+input UsuarioRegistrarInput {
+  nome: String
+  email: String
+  senha: String
+}
+
 input UsuarioInput {
   nome: String
   email: String

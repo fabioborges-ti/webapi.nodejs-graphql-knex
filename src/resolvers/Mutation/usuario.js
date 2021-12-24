@@ -1,12 +1,20 @@
+const bcrypt = require('bcrypt-nodejs');
 const db = require('../../config/db');
 const { perfil: obterPerfil } = require('../Query/perfil');
 const { usuario: obterUsuario } = require('../Query/usuario');
 
-module.exports = {
+const mutations = {
+  async registrarUsuario(_, { dados }) {
+    return mutations.novoUsuario(_, {
+      dados: {
+        nome: dados.nome,
+        email: dados.email,
+        senha: dados.senha,
+      },
+    });
+  },
   async novoUsuario(_, { dados }) {
     try {
-      const idsPerfis = [];
-
       // verifica de email já está cadastrado na base
       const emailExistente = await obterUsuario(_, {
         filtro: { email: dados.email },
@@ -14,15 +22,24 @@ module.exports = {
 
       if (emailExistente) return new Error('Email já cadastrado');
 
+      // verifica se foi enviado payload de registro comum
+      if (!dados.perfis || !dados.perfis.length) {
+        dados.perfis = [{ nome: 'comum' }];
+      }
+
       // recupera e valida todos os perfis enviados no payload
-      if (dados.perfis) {
-        for (const filtro of dados.perfis) {
-          const perfil = await obterPerfil(_, { filtro });
-          if (perfil) {
-            idsPerfis.push(perfil.id);
-          }
+      const idsPerfis = [];
+
+      for (const filtro of dados.perfis) {
+        const perfil = await obterPerfil(_, { filtro });
+        if (perfil) {
+          idsPerfis.push(perfil.id);
         }
       }
+
+      // gera senha criptografada
+      const salt = bcrypt.genSaltSync();
+      dados.senha = bcrypt.hashSync(dados.senha, salt);
 
       // remove atributo perfis do objeto DADOS porque não há coluna perfis na tabela de usuários
       delete dados.perfis;
@@ -69,6 +86,12 @@ module.exports = {
       // remove propriedade perfis do payload, afinal não há coluna perfis na tabela de usuários
       delete dados.perfis;
 
+      // se atributo senha foi enviado gerar nova criptografia
+      if (dados.senha) {
+        const salt = bcrypt.genSaltSync();
+        dados.senha = bcrypt.hashSync(dados.senha, salt);
+      }
+
       // atualiza tabela de usuários
       await db('usuarios').where({ id }).update(dados);
 
@@ -92,3 +115,5 @@ module.exports = {
     }
   },
 };
+
+module.exports = mutations;
