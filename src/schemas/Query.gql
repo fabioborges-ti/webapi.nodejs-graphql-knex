@@ -1,5 +1,6 @@
 # pontos de entrada da sua api
 type Query {
+  login(dados: UsuarioLoginInput!): Usuario
   usuarios: [Usuario]
   usuario(filtro: UsuarioFiltro!): Usuario
   perfis: [Perfil]
