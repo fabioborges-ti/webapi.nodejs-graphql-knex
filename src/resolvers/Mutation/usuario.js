@@ -13,7 +13,9 @@ const mutations = {
       },
     });
   },
-  async novoUsuario(_, { dados }) {
+  async novoUsuario(_, { dados }, ctx) {
+    ctx && ctx.validarAdmin();
+
     try {
       // verifica de email já está cadastrado na base
       const emailExistente = await obterUsuario(_, {
@@ -24,7 +26,7 @@ const mutations = {
 
       // verifica se foi enviado payload de registro comum
       if (!dados.perfis || !dados.perfis.length) {
-        dados.perfis = [{ nome: 'comum' }];
+        dados.perfis = [{ nome: 'admin' }];
       }
 
       // recupera e valida todos os perfis enviados no payload
@@ -61,7 +63,8 @@ const mutations = {
       throw new Error(err.detail);
     }
   },
-  async alterarUsuario(_, { filtro, dados }) {
+  async alterarUsuario(_, { filtro, dados }, ctx) {
+    ctx && ctx.validarUsuarioFiltro(filtro);
     try {
       // verifica se registro de usuário existe
       const usuario = await obterUsuario(_, { filtro });
@@ -70,20 +73,27 @@ const mutations = {
       // recupera ID do usuario
       const { id } = usuario;
 
-      // remove as relações de perfis do usuário
-      await db('usuarios_perfis').where({ usuario_id: id }).delete();
+      console.log('ate aqui ok');
 
-      // recria as relações de perfis com usuário
-      for (const filtro of dados.perfis) {
-        const perfil = await obterPerfil(_, { filtro });
-        if (perfil) {
-          await db('usuarios_perfis').insert({
-            perfil_id: perfil.id,
-            usuario_id: id,
-          });
+      if (ctx.admin && dados.perfis) {
+        console.log('entrou...');
+        // remove as relações de perfis do usuário
+        await db('usuarios_perfis').where({ usuario_id: id }).delete();
+
+        // recria as relações de perfis com usuário
+        for (const filtro of dados.perfis) {
+          const perfil = await obterPerfil(_, { filtro });
+          if (perfil) {
+            await db('usuarios_perfis').insert({
+              perfil_id: perfil.id,
+              usuario_id: id,
+            });
+          }
         }
       }
+
       // remove propriedade perfis do payload, afinal não há coluna perfis na tabela de usuários
+      console.log('saiu...');
       delete dados.perfis;
 
       // se atributo senha foi enviado gerar nova criptografia
@@ -101,7 +111,9 @@ const mutations = {
       throw new Error(err.detail);
     }
   },
-  async excluirUsuario(_, { filtro }) {
+  async excluirUsuario(_, { filtro }, ctx) {
+    ctx && ctx.validarAdmin();
+
     try {
       const usuario = await obterUsuario(_, { filtro });
       if (usuario) {
