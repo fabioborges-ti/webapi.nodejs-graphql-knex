@@ -73,10 +73,7 @@ const mutations = {
       // recupera ID do usuario
       const { id } = usuario;
 
-      console.log('ate aqui ok');
-
       if (ctx.admin && dados.perfis) {
-        console.log('entrou...');
         // remove as relações de perfis do usuário
         await db('usuarios_perfis').where({ usuario_id: id }).delete();
 
@@ -93,7 +90,6 @@ const mutations = {
       }
 
       // remove propriedade perfis do payload, afinal não há coluna perfis na tabela de usuários
-      console.log('saiu...');
       delete dados.perfis;
 
       // se atributo senha foi enviado gerar nova criptografia
